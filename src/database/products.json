@@ -1,0 +1,84 @@
+[
+  {
+    "id": 0,
+    "title": "Cerveza",
+    "description": "Scottish Ale",
+    "price": 280,
+    "thumbnail": "scottish.jpg",
+    "code": 5229,
+    "stock": 22
+  },
+  {
+    "id": 1,
+    "title": "Cerveza",
+    "description": "Ipa atomica",
+    "price": 300,
+    "thumbnail": "atomica.jpg",
+    "code": 2359,
+    "stock": 20
+  },
+  {
+    "id": 2,
+    "title": "Cerveza",
+    "description": "Apa Revolution",
+    "price": 250,
+    "thumbnail": "apa.jpg",
+    "code": 5792,
+    "stock": 43
+  },
+  {
+    "id": 4,
+    "title": "Cerveza",
+    "description": "Blonde Ale",
+    "price": 230,
+    "thumbnail": "blonde.jpg",
+    "code": 8337,
+    "stock": 23
+  },
+  {
+    "id": 5,
+    "title": "Cerveza",
+    "description": "Cabutiña Pumpkin Ale",
+    "price": 320,
+    "thumbnail": "cabu.jpg",
+    "code": 8473,
+    "stock": 10
+  },
+  {
+    "id": 6,
+    "title": "Cerveza",
+    "description": "American Pale Ale",
+    "price": 290,
+    "thumbnail": "ale.jpg",
+    "code": 4322,
+    "stock": 23
+  },
+  {
+    "id": 7,
+    "title": "Cerveza",
+    "description": "Barbara Weizen",
+    "price": 200,
+    "thumbnail": "barbara.jpg",
+    "code": 3123,
+    "stock": 93
+  },
+  {
+    "id": 8,
+    "title": "Cerveza",
+    "description": "Doble Ipa",
+    "price": 350,
+    "thumbnail": "doble.jpg",
+    "code": 271,
+    "stock": 78
+  },
+  {
+    "id": 9,
+    "title": "Cerveza",
+    "description": "Sabotaje Oatmeal",
+    "price": 250,
+    "thumbnail": "sabotaje.jpg",
+    "code": 7167,
+    "stock": 20
+  }
+
+]
