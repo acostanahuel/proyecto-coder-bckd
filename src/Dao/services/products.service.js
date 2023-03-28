@@ -1,4 +1,5 @@
-import { productModel } from "./models/products.js";
+
+import { productModel } from "../DB/models/product.model";
 
 export default class ProductService {
     getAll = async () => {
