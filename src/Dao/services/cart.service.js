@@ -1,28 +1,29 @@
-import { cartModel } from "./models/carts.js";
+import { cartsModel } from "../DB/models/carts.model.js";
 import ProductService from "./products.service.js";
 
 const productService = new ProductService();
 
+
 export default class CartService{
 
     getAll = async () =>{
-        let carts = await cartModel.find();
+        let carts = await cartsModel.find();
         return carts.map(carts => carts.toObject());
     };
 
     save = async (cart) =>{
-        let result = await cartModel.create(cart);
+        let result = await cartsModel.create(cart);
         return result;
     };
 
     getById = async (_id) =>{
-        let getCartById = await cartModel.findById(_id).populate("products.product");
+        let getCartById = await cartsModel.findById(_id).populate("products.product");
         return getCartById.toObject();
     };
 
     addProduct = async (cartId, prodId) =>{
         let product = await productService.getById(prodId)
-        let cart = await cartModel.findById(cartId).populate("products.product");
+        let cart = await cartsModel.findById(cartId).populate("products.product");
 
         if(cart){
             cart.products.push({product, quantity: 1})
@@ -32,7 +33,7 @@ export default class CartService{
     };
 
     deleteProduct = async (cartId, prodId) => {
-        let cart = await cartModel.findById(cartId)
+        let cart = await cartsModel.findById(cartId)
         let index = cart.products.findIndex(p => p.prodId == p.prodId);
 
         cart.products.splice(index,1);
@@ -42,11 +43,11 @@ export default class CartService{
     };
 
     deleteAllProducts = async (cartId) => {
-        let emptyCart = await cartModel.findById(cartId);
+        let emptyCart = await cartsModel.findById(cartId);
         
         emptyCart.products = [];
 
-        await cartModel.updateOne({cartId}, emptyCart);
+        await cartsModel.updateOne({cartId}, emptyCart);
         
         const result = await emptyCart.save();
         return result;
@@ -54,7 +55,7 @@ export default class CartService{
     };
 
     updateCart = async (cartId, products) => {
-        const cart = await cartModel.findById(cartId);
+        const cart = await cartsModel.findById(cartId);
         
         const updateProd = products.map(p => ({
             prodId: p.prodId,
@@ -68,7 +69,7 @@ export default class CartService{
     };
 
     updateQuantity = async (cartId, prodId, quantity) =>{
-        const cart = await cartModel.findById(cartId);
+        const cart = await cartsModel.findById(cartId);
 
         const isInCart = cart.products.find(p => p.prodId == p.prodId);
 
