@@ -11,7 +11,10 @@ import mongoosePaginate from 'mongoose-paginate-v2'
 
 const router = Router();
 const productManager = new ProductManager ();
+<<<<<<< HEAD
 
+=======
+>>>>>>> 431739c3eb41fc3e1e2892e7e0df90d7a01c668c
 
 
 //1 listado de productos//
