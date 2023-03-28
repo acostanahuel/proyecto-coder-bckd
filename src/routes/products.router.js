@@ -11,7 +11,7 @@ import mongoosePaginate from 'mongoose-paginate-v2'
 
 const router = Router();
 const productManager = new ProductManager ();
-const ProductService = new ProductService ();
+
 
 
 //1 listado de productos//
