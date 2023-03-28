@@ -7,13 +7,13 @@ import CartsRouter from "./routes/carts.router.js";
 import ViewsRouter from "./routes/views.router.js";
 import ProductManager from "./Dao/filesystem/ProductManager.js";
 import mongoose from 'mongoose';
-import socketFunctions from "./services/app.service.js"
+
 
 
 
 const app = express();
 const productManager = new ProductManager();
-productManager.getProducts();
+// productManager.getProducts();
 
 // handlebars use
 app.engine('handlebars', handlebars.engine());
@@ -40,7 +40,7 @@ const socketServer = new Server(httpServer);
 socketServer.on('connection', socket => {
   console.log('new user conected:', socket.id);
 
-  socket.on('client:message', msg => { console.log(msg); });
+  socket.on('client:message', msg => { console.log(msg); });- 
 
   socket.on('client:products', async ()=> {
     const Products =  await productManager.getProducts();
