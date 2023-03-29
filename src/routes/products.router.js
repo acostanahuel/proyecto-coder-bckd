@@ -1,6 +1,6 @@
 import {Router} from "express"
 
-//ACTIVAR UNO O OTRO PARA TRABAJAR CON FS O DB
+//ACTIVAR O DESACTIVAR 
 import ProductManager from "../Dao/filesystem/ProductManager.js";
 import { productModel } from "../Dao/DB/models/product.model.js";
 import ProductService from "../Dao/services/products.service.js";
