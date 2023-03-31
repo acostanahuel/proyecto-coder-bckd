@@ -1,6 +1,6 @@
 import {Router} from "express"
 
-//ACTIVAR UNO O OTRO PARA TRABAJAR CON FS O DB
+//ACTIVAR O DESACTIVAR 
 import ProductManager from "../Dao/filesystem/ProductManager.js";
 import { productModel } from "../Dao/DB/models/product.model.js";
 import ProductService from "../Dao/services/products.service.js";
@@ -10,8 +10,10 @@ import mongoosePaginate from 'mongoose-paginate-v2';
 
 
 const router = Router();
+
 // const productManager = new ProductManager ();
 const productService = new ProductService ();
+
 
 
 // //1 listado de productos//
