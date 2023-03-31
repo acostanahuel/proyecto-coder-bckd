@@ -1,0 +1,58 @@
+<ul>
+    {{#if user}}
+    <div>
+        <h1>Bienvenido!</h1>
+        <p>{{user.name}}</p>
+        <p>{{user.email}}</p>
+        <p>{{user.age}}</p>
+    </div>
+    {{#if admin}}
+        <span >ADMIN</span>
+    {{/if}}
+        <form method="POST" action="/api/sessions/logout">
+            <button class="btn btn-primary" type="submit">Logout</button>
+        </form>
+    {{else}}
+    <button>
+        <a class="btn btn-primary btn-sm nav-link" href="/users/login">Login</a>
+    </button>
+    {{/if}}
+</ul>
+
+<h1 class="text-center">Lista de Productos</h1>
+
+{{#if isValid}}
+<div class="container cardProd">
+    <div class="row">
+        <div class= "card bg-ligth col-md-4" style="width: 18rem;" >
+            {{#each docs}}
+            <img src="" class="card-img-top cardImg" alt="">
+            <div class= "card-body">
+                <h5 class="card-title text-center">{{this.title}}</h5>
+                <p class="card-text text-center">{{this.description}}</p>
+                <p class="card-text text-center">Precio: {{this.price}}</p>
+                <p class="card-text text-center">Stock: {{this.stock}}</p>
+                <p class="card-text text-center">{{this.category}}</p>
+                <button class="btn btn-primary btnAddCart align-self-center"> Agregar al carrito </button>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
+
+<div>
+    {{#if hasPrevPage}}
+        <a href={{this.prevLink}}> Anterior</a>
+    {{/if}}
+    &nbsp;
+    {{this.page}}
+    &nbsp;
+     {{#if hasNextPage}}
+        <a href={{this.nextLink}}>Siguiente</a>
+    {{/if}} 
+</div>
+
+
+{{/if}}
+
+<script src="/socket.io/socket.io.js"></script>

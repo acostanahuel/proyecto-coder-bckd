@@ -6,9 +6,13 @@ import ProductsRouter from "./routes/products.router.js";
 import CartsRouter from "./routes/carts.router.js";
 import ViewsRouter from "./routes/views.router.js";
 import ProductManager from "./Dao/filesystem/ProductManager.js";
+import sessionsRouter from "./routes/sessions.router.js";
+import usersViewRouter from './routes/users.view.router.js';
 import mongoose from 'mongoose';
-
-
+import MongoStore from "connect-mongo";
+import session from "express-session";
+import { mongoDB_URL } from "./setting.js";
+import cookieParser from "cookie-parser";
 
 
 const app = express();
@@ -28,6 +32,11 @@ app.use(express.static(__dirname + '/public'));
 app.use(`/api/products`, ProductsRouter);
 app.use(`/api/carts`, CartsRouter);
 app.use(`/api/views`, ViewsRouter);
+app.use("/api/sessions", sessionsRouter);
+app.use ('/users', usersViewRouter); //simplemente una vista renderiza informacion 
+app.use(express.static(__dirname+'/public'));
+app.use(cookieParser());
+
 
 const SERVER_PORT = 8080;
 const httpServer = app.listen(SERVER_PORT, () => {
@@ -48,9 +57,10 @@ socketServer.on('connection', socket => {
   });
 });
 
+
 const connectMongoDB = async ()=>{
   try {
-      await mongoose.connect('mongodb+srv://dnacostab:1713na@cluster0.w7tlxyp.mongodb.net/ecommerce?retryWrites=true&w=majority'); //DB products en MONGO ATLAS
+      await mongoose.connect(mongoDB_URL); //DB products en MONGO ATLAS
       console.log("Conectado con exito a MongoDB usando Moongose.");
   } catch (error) {
       console.error("No se pudo conectar a la BD usando Moongose: " + error);
@@ -58,3 +68,14 @@ const connectMongoDB = async ()=>{
   }
 };
 connectMongoDB();
+
+app.use(session({
+  store: MongoStore.create({
+      mongoUrl: mongoDB_URL,
+      mongoOptions: {useNewUrlParser: true, useUnifiedTopology: true},
+      ttl: 30
+  }),
+  secret: "n4hu3l",
+  resave: false,
+  saveUninitialized: true
+}))
