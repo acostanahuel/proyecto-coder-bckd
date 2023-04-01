@@ -10,10 +10,10 @@ router.get ('/register', (req, res) =>{
     res.render('register')
 });
 
-router.get ('/', (req, res) => {
-    res.render ('profile', {
-        users: req.session.users
-    });
-})
+router.get('/', (req, res) => {
+    const user = req.session && req.session.users;
+    res.render('profile', { user });
+  });
+  
 
 export default router;

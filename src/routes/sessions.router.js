@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import  {userModel}  from '../Dao/DB/models/users.model.js';
+import  {userModel}  from '../Dao/DB/models/user.model.js';
 
 const router = Router();
 
@@ -11,7 +11,7 @@ router.post("/register", async (req, res)=>{
     const exists = await userModel.findOne({email});
 
     if (exists){
-        return res.status(400).send({status: "error", message: "El suario ya existe"});
+        return res.status(400).send({status: "error", message: "El usuario ya existe"});
     }
 
     const user = {

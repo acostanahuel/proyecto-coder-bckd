@@ -7,7 +7,7 @@ import CartsRouter from "./routes/carts.router.js";
 import ViewsRouter from "./routes/views.router.js";
 import ProductManager from "./Dao/filesystem/ProductManager.js";
 import sessionsRouter from "./routes/sessions.router.js";
-import usersViewRouter from './routes/users.view.router.js';
+import usersViewRouter from './routes/user.view.router.js';
 import mongoose from 'mongoose';
 import MongoStore from "connect-mongo";
 import session from "express-session";

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const usersCollection = 'users';
+const userCollection = 'users';
 
 const stringNoUniqueRequired = {
     type: String,
@@ -30,4 +30,4 @@ const userSchema = new mongoose.Schema({
     },
 })
 
-export const userModel = mongoose.model(usersCollection, userSchema);
+export const userModel = mongoose.model(userCollection, userSchema);
