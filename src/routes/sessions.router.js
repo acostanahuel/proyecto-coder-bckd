@@ -14,7 +14,7 @@ router.post("/register", async (req, res)=>{
         return res.status(400).send({status: "error", message: "El usuario ya existe"});
     }
 
-    const user = {
+   const user = {
         first_name,
         last_name,
         email,
@@ -31,8 +31,8 @@ router.post("/register", async (req, res)=>{
         status: "success",
         message: `User created successfully, ID: ${result.id}`,
         redirectUrl: '/users/login'
-    });
-    //res.status(201).send({status: "success", message: "Usuario creado con extito con ID: " + result.id, redirectUrl: '/users/login'});
+    }); 
+    res.status(201).send({status: "success", message: "Usuario creado con extito con ID: " + result.id, redirectUrl: '/users/login'});
 });
 
 router.post("/login", async (req, res)=>{
@@ -51,8 +51,8 @@ router.post("/login", async (req, res)=>{
         req.session.admin = true;
     }
 
-    return res.redirect("/products")
-    //res.send({status:"success", payload:req.session.user, message:"¡Primer logueo realizado! :)" }).redirect('/products');;
+    //return res.redirect("/products")
+    return res.send({status:"success", payload:req.session.user, message:"¡Primer logueo realizado! :)" }).redirect('/products');;
 });
 
 router.post('/logout', (req, res) => {

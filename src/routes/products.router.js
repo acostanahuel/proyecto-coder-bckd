@@ -15,7 +15,7 @@ const router = Router();
 const productService = new ProductService ();
 
 
-
+///CON FS
 // //1 listado de productos//
 // router.get(`/`, async (req, res) => { productManager.getProducts(); res.send(productManager.products); });
 

@@ -129,4 +129,6 @@ router.put("/:cartId/product/:prodId", async (request, response) =>{
         response.status(500).send({error: "No se pudo actualizar la cantidad de los productos", message: error})
     } 
 });
+
+
 export default router;

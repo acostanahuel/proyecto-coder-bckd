@@ -1,6 +1,7 @@
 import express from "express";
 import __dirname from "./util.js";
 import { Server } from "socket.io";
+import session from "express-session";
 import handlebars from "express-handlebars";
 import ProductsRouter from "./routes/products.router.js";
 import CartsRouter from "./routes/carts.router.js";
@@ -10,7 +11,6 @@ import sessionsRouter from "./routes/sessions.router.js";
 import usersViewRouter from './routes/user.view.router.js';
 import mongoose from 'mongoose';
 import MongoStore from "connect-mongo";
-import session from "express-session";
 import { mongoDB_URL } from "./setting.js";
 import cookieParser from "cookie-parser";
 
@@ -27,15 +27,34 @@ app.set('view engine', 'handlebars');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // public folder
+app.use("/api/session", sessionsRouter);
+app.use ('/users', usersViewRouter); //simplemente una vista renderiza informacion 
 app.use(express.static(__dirname + '/public'));
+app.use(cookieParser());
+
+app.use(session({
+  store: MongoStore.create({
+      mongoUrl: mongoDB_URL,
+      mongoOptions: {useNewUrlParser: true, useUnifiedTopology: true},
+      ttl: 30
+  }),
+  secret: "n4hu3l",
+  resave: false,
+  saveUninitialized: true
+}));
+
+
+const hdbs = handlebars.create({
+  defaultLayout: 'main',
+  extname: '.handlebars',
+  allowProtoMethodsByDefault: true // aquí se agrega la propiedad
+});
+
 // Routers
 app.use(`/api/products`, ProductsRouter);
 app.use(`/api/carts`, CartsRouter);
 app.use(`/api/views`, ViewsRouter);
-app.use("/api/sessions", sessionsRouter);
-app.use ('/users', usersViewRouter); //simplemente una vista renderiza informacion 
-app.use(express.static(__dirname+'/public'));
-app.use(cookieParser());
+
 
 
 const SERVER_PORT = 8080;
@@ -69,13 +88,3 @@ const connectMongoDB = async ()=>{
 };
 connectMongoDB();
 
-app.use(session({
-  store: MongoStore.create({
-      mongoUrl: mongoDB_URL,
-      mongoOptions: {useNewUrlParser: true, useUnifiedTopology: true},
-      ttl: 30
-  }),
-  secret: "n4hu3l",
-  resave: false,
-  saveUninitialized: true
-}))

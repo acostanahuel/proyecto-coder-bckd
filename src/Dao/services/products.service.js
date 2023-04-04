@@ -1,3 +1,7 @@
+import { productModel } from "../DB/models/product.model.js";
+
+
+
 export default class ProductService {
     getAll = async () => {
         let products = await productModel.find();
