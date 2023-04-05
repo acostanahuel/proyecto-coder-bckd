@@ -27,8 +27,7 @@ app.set('view engine', 'handlebars');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // public folder
-app.use("/api/session", sessionsRouter);
-app.use ('/users', usersViewRouter); //simplemente una vista renderiza informacion 
+
 app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
 
@@ -44,17 +43,25 @@ app.use(session({
 }));
 
 
-const hdbs = handlebars.create({
-  defaultLayout: 'main',
-  extname: '.handlebars',
-  allowProtoMethodsByDefault: true // aquí se agrega la propiedad
-});
 
 // Routers
 app.use(`/api/products`, ProductsRouter);
 app.use(`/api/carts`, CartsRouter);
 app.use(`/api/views`, ViewsRouter);
+app.use(`/api/users`, usersViewRouter);
+app.use(`/api/sessions`, sessionsRouter);
 
+
+const connectMongoDB = async ()=>{
+  try {
+      await mongoose.connect(mongoDB_URL); //DB products en MONGO ATLAS
+      console.log("Conectado con exito a MongoDB usando Moongose.");
+  } catch (error) {
+      console.error("No se pudo conectar a la BD usando Moongose: " + error);
+      process.exit();
+  }
+};
+connectMongoDB();
 
 
 const SERVER_PORT = 8080;
@@ -77,14 +84,4 @@ socketServer.on('connection', socket => {
 });
 
 
-const connectMongoDB = async ()=>{
-  try {
-      await mongoose.connect(mongoDB_URL); //DB products en MONGO ATLAS
-      console.log("Conectado con exito a MongoDB usando Moongose.");
-  } catch (error) {
-      console.error("No se pudo conectar a la BD usando Moongose: " + error);
-      process.exit();
-  }
-};
-connectMongoDB();
 
