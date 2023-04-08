@@ -15,18 +15,14 @@ registerForm.addEventListener('submit',e=>{
         headers:{
             'Content-Type':'application/json'
         }
-    }).then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error('Server error');
-        }
-    }).then(data => {
-        if (data.status === "success") {
-            window.location.href = data.redirectUrl;
-        } else {
-            console.error('Error:', data.message);
-        }
-    }).catch(error => {
-        console.error('Error:', error);
-    })})
+    }).then(result => {
+      if (result.status === 201) {
+        result.json();
+        alert ('Usuario creado con exito');
+        window.location.replace('/users/login');
+      }else {
+        alert ('No se pudo crear el usuario, ya existe');
+      }
+    }).then (
+        json => console.log(json));
+})

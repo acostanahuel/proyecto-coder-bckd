@@ -13,6 +13,18 @@ const productManager = new ProductManager();
 //cookie
 router.use(cookieParser('n4hu3l'));
 
+//session management
+router.get( "/sessions", (req, res) => {
+  if (req.session.counter) {
+    req.session.counter++;
+    res.send (`Se ha visitado este sitio ${req.session.counter} vece`)
+  } else{ 
+    req.session.counter= 1;
+    res.send ("Bienvenido");
+  }
+});
+
+
 // Show all products with FSystem
 router.get(`/`, async (req, res) => {
   const Products = await productManager.getProducts();

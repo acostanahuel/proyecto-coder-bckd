@@ -6,9 +6,9 @@ import handlebars from "express-handlebars";
 import ProductsRouter from "./routes/products.router.js";
 import CartsRouter from "./routes/carts.router.js";
 import ViewsRouter from "./routes/views.router.js";
-import ProductManager from "./Dao/filesystem/ProductManager.js";
+import UsersViewRouter from "./routes/users.views.router.js";
 import sessionsRouter from "./routes/sessions.router.js";
-import usersViewRouter from './routes/user.view.router.js';
+import ProductManager from "./Dao/filesystem/ProductManager.js";
 import mongoose from 'mongoose';
 import MongoStore from "connect-mongo";
 import { mongoDB_URL } from "./setting.js";
@@ -17,19 +17,23 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 const productManager = new ProductManager();
-// productManager.getProducts();
+
+
+//public folder
+app.use(express.static(__dirname + '/public'));
+
+
+// JSON encode para poder recibir JSON.
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // handlebars use
 app.engine('handlebars', handlebars.engine());
 app.set('views', __dirname + "/views");
 app.set('view engine', 'handlebars');
-// JSON encode
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-// public folder
 
-app.use(express.static(__dirname + '/public'));
-app.use(cookieParser());
+app.use(cookieParser('n4hu3l'));
 
 app.use(session({
   store: MongoStore.create({
@@ -48,8 +52,8 @@ app.use(session({
 app.use(`/api/products`, ProductsRouter);
 app.use(`/api/carts`, CartsRouter);
 app.use(`/api/views`, ViewsRouter);
-app.use(`/api/users`, usersViewRouter);
-app.use(`/api/sessions`, sessionsRouter);
+app.use (`/users`, UsersViewRouter); ///solo rendereiza info por eso va sin api
+app.use (`/api/sessions`, sessionsRouter);
 
 
 const connectMongoDB = async ()=>{
@@ -63,11 +67,10 @@ const connectMongoDB = async ()=>{
 };
 connectMongoDB();
 
-
 const SERVER_PORT = 8080;
 const httpServer = app.listen(SERVER_PORT, () => {
   console.log(`Server running in port ${SERVER_PORT}`);
-  console.log(__dirname);
+  //console.log(__dirname);
 });
 
 const socketServer = new Server(httpServer);

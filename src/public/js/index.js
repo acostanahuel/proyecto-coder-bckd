@@ -24,4 +24,3 @@ const addProductsToRealTime = (products) => {
     productsContainer.innerHTML = html;
   });
 };
-

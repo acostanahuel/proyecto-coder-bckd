@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import  {userModel}  from '../Dao/DB/models/user.model.js';
+import { createHash, isValidPassword } from '../util.js';
 
 const router = Router();
 
@@ -19,40 +20,33 @@ router.post("/register", async (req, res)=>{
         last_name,
         email,
         age,
-        password
+        password: createHash(password)
     };
-
-    if (email === "adminCoder@coder.com" && password === "adminCod3r123"){
-        user.role = 'admin';
-    }
-
     const result = await userModel.create(user);
     res.status(201).json({
         status: "success",
         message: `User created successfully, ID: ${result.id}`,
         redirectUrl: '/users/login'
     }); 
-    res.status(201).send({status: "success", message: "Usuario creado con extito con ID: " + result.id, redirectUrl: '/users/login'});
+
 });
 
 router.post("/login", async (req, res)=>{
     const {email, password} = req.body;
-    const user = await userModel.findOne({email,password}); 
+    const user = await userModel.findOne({email}); 
+    console.log("Usuario encontrado para login");
+    console.log(user);
 
     if(!user) return res.status(401).send({status:"error", error:"Los datos ingresados son inválidos"});
-
+    if (!isValidPassword (user, password)) {       ///aca password ya llega hasheado
+        return res.status(401).send({status:"error", error:"Los datos ingresados son inválidos"});
+    }
     req.session.user = {
-        name : `${user.first_name} ${user.last_name}`,
+        name: `${user.first_name} ${user.last_name}`,
         email: user.email,
-        age: user.age
+        age: user.age 
     }
-
-    if (user.role === 'admin') {
-        req.session.admin = true;
-    }
-
-    //return res.redirect("/products")
-    return res.send({status:"success", payload:req.session.user, message:"¡Primer logueo realizado! :)" }).redirect('/products');;
+    res.send ({status: "success",  payload: req.session.user, message: "Logeuo realizado con exito"});
 });
 
 router.post('/logout', (req, res) => {

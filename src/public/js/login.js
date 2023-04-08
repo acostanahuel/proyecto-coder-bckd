@@ -10,10 +10,13 @@ loginForm.addEventListener('submit',e=>{
         body:JSON.stringify(obj),
         headers:{
             'Content-Type':'application/json'
-        }
+        },
     }).then(result=>{
         if(result.status===200){
-            window.location.replace('/api/products');
+            window.location.replace('/users');
+        } else if (result.status === 401){
+            console.log(result);
+            alert("Login invalido revista tus credenciales");
         }
-    })
-})
+    });
+});
