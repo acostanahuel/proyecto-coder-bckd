@@ -1,57 +1,52 @@
 import { Router } from 'express';
-import  {userModel}  from '../Dao/DB/models/user.model.js';
+import userModel  from '../Dao/DB/models/user.model.js';
 import { createHash, isValidPassword } from '../util.js';
+import passport from 'passport';
 
 const router = Router();
 
-router.post("/register", async (req, res)=>{
-    const { first_name, last_name, email, age, password} = req.body;
-    console.log("Registrando usuario:");
-    console.log(req.body);
+router.get("/github", passport.authenticate('github', {scope: ['user:email']}), async (req, res) => {});
 
-    const exists = await userModel.findOne({email});
-
-    if (exists){
-        return res.status(400).send({status: "error", message: "El usuario ya existe"});
-    }
-
-   const user = {
-        first_name,
-        last_name,
-        email,
-        age,
-        password: createHash(password)
-    };
-    const result = await userModel.create(user);
-    res.status(201).json({
-        status: "success",
-        message: `User created successfully, ID: ${result.id}`,
-        redirectUrl: '/users/login'
-    }); 
-
-});
-
-router.post("/login", async (req, res)=>{
-    const {email, password} = req.body;
-    const user = await userModel.findOne({email}); 
-    console.log("Usuario encontrado para login");
-    console.log(user);
-
-    if(!user) return res.status(401).send({status:"error", error:"Los datos ingresados son inválidos"});
-    if (!isValidPassword (user, password)) {       ///aca password ya llega hasheado
-        return res.status(401).send({status:"error", error:"Los datos ingresados son inválidos"});
-    }
-    req.session.user = {
-        name: `${user.first_name} ${user.last_name}`,
+router.get("/githubcallback", passport.authenticate('github', {failureRedirect: '/github/error'}), async (req, res) => {
+    const user = req.user;
+    req.session.user= {
+        name : `${user.first_name} ${user.last_name}`,
         email: user.email,
-        age: user.age 
-    }
-    res.send ({status: "success",  payload: req.session.user, message: "Logeuo realizado con exito"});
+        age: user.age
+    };
+    req.session.admin = true;
+    res.redirect("/github");
 });
 
-router.post('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/users/login');
+
+router.post("/register", passport.authenticate(
+    'register', {failureRedirect: '/fail-register'}),  
+    async (req, res)=>{
+    console.log("Registrando usuario nuevo");
+    res.status(201).send ({status: "success", message: "usuario creado con exito"});
 });
+
+router.post("/login", passport.authenticate ('login', {failureRedirect: '/api/sessions/fail-login'}), async (req, res)=>{
+   console.log('User found to login:');
+   const user = req.user;
+   console.log(user);
+   if (!user) return res.status(401).send({status:"error", error: "Credentials do not match"});
+   req.session.user= {
+    name: `${user.first_name} ${user.last_name}`,
+    email: user.email,
+    age: user.age
+ }
+    res.send({status: "success", payload: req.session.user, message: "first loguin :)"});
+});
+
+
+router.get ('/fail-register', (req, res) => {
+    res.status(401).send({error: "Failed to process register!"});
+})
+
+
+router.get ('/fail-login', (req, res) => {
+    res.status(401).send({error: "Failed to process login!"});
+})
 
 export default router;

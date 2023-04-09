@@ -3,16 +3,27 @@ import __dirname from "./util.js";
 import { Server } from "socket.io";
 import session from "express-session";
 import handlebars from "express-handlebars";
+
+///Routers
 import ProductsRouter from "./routes/products.router.js";
 import CartsRouter from "./routes/carts.router.js";
+import ProductManager from "./Dao/filesystem/ProductManager.js";
 import ViewsRouter from "./routes/views.router.js";
 import UsersViewRouter from "./routes/users.views.router.js";
 import sessionsRouter from "./routes/sessions.router.js";
-import ProductManager from "./Dao/filesystem/ProductManager.js";
+import githubLoginViewRouter from "./routes/github-login.views.router.js";
+
+///mongo
 import mongoose from 'mongoose';
 import MongoStore from "connect-mongo";
-import { mongoDB_URL } from "./setting.js";
+import { mongoDB_URL } from "./config/setting.js";
+
+//cookie
 import cookieParser from "cookie-parser";
+
+//passport
+import passport from "passport";
+import initializePassport from "./config/passport.config.js";
 
 
 const app = express();
@@ -33,6 +44,7 @@ app.engine('handlebars', handlebars.engine());
 app.set('views', __dirname + "/views");
 app.set('view engine', 'handlebars');
 
+//cookie
 app.use(cookieParser('n4hu3l'));
 
 app.use(session({
@@ -46,6 +58,10 @@ app.use(session({
   saveUninitialized: true
 }));
 
+//middlewares passport
+initializePassport();
+app.use(passport.initialize());
+app.use (passport.session());
 
 
 // Routers
@@ -54,6 +70,7 @@ app.use(`/api/carts`, CartsRouter);
 app.use(`/api/views`, ViewsRouter);
 app.use (`/users`, UsersViewRouter); ///solo rendereiza info por eso va sin api
 app.use (`/api/sessions`, sessionsRouter);
+app.use ('/github', githubLoginViewRouter);
 
 
 const connectMongoDB = async ()=>{
