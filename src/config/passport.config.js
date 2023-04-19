@@ -1,7 +1,7 @@
 import passport from "passport";
 import passportLocal from 'passport-local';
 import gitHubStrategy from 'passport-github2'
-import userModel from '../Dao/DB/models/user.model.js';
+import userModel from '../models/user.model.js';
 import { createHash, isValidPassword } from "../util.js";
 import router from "../routes/sessions.router.js";
 
@@ -54,8 +54,6 @@ passport.use ('github', new gitHubStrategy(
 
     })
 );
-
-
 
 
 

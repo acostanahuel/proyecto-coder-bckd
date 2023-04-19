@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import userModel  from '../Dao/DB/models/user.model.js';
-import { createHash, isValidPassword } from '../util.js';
+import userModel  from '../models/user.model.js';
+import { authToken, createHash, isValidPassword } from '../util.js';
 import passport from 'passport';
+import { generateJWToken } from '../util.js';
 
 const router = Router();
 
@@ -31,12 +32,18 @@ router.post("/login", passport.authenticate ('login', {failureRedirect: '/api/se
    const user = req.user;
    console.log(user);
    if (!user) return res.status(401).send({status:"error", error: "Credentials do not match"});
-   req.session.user= {
-    name: `${user.first_name} ${user.last_name}`,
-    email: user.email,
-    age: user.age
- }
-    res.send({status: "success", payload: req.session.user, message: "first loguin :)"});
+//    req.session.user= {
+//     name: `${user.first_name} ${user.last_name}`,
+//     email: user.email,
+//     age: user.age
+//  }
+    const access_token = generateJWToken(user);
+    console.log(access_token);
+    res.send({access_token: access_token});
+});
+
+router.get ('/current', authToken, (req, res) => {
+    res.send({status:"success", access_token});
 });
 
 
@@ -49,4 +56,4 @@ router.get ('/fail-login', (req, res) => {
     res.status(401).send({error: "Failed to process login!"});
 })
 
-export default router;
+export default router; 

@@ -1,4 +1,4 @@
-import { cartsModel } from "../DB/models/carts.model.js";
+import { cartsModel } from "../../models/carts.model.js";
 import ProductService from "./products.service.js";
 
 const productService = new ProductService();

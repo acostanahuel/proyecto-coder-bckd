@@ -30,10 +30,6 @@ const app = express();
 const productManager = new ProductManager();
 
 
-//public folder
-app.use(express.static(__dirname + '/public'));
-
-
 // JSON encode para poder recibir JSON.
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -44,6 +40,9 @@ app.engine('handlebars', handlebars.engine());
 app.set('views', __dirname + "/views");
 app.set('view engine', 'handlebars');
 
+
+//public folder
+app.use(express.static(__dirname + '/public'));
 //cookie
 app.use(cookieParser('n4hu3l'));
 
