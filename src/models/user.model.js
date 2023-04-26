@@ -11,7 +11,11 @@ const userSchema = new mongoose.Schema({
     },
     age:Number,
     password: String,
-    loggedBy: String
+    loggedBy: String,
+    cart: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'carts'
+    }
 
 });
 

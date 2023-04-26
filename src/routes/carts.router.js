@@ -130,5 +130,25 @@ router.put("/:cartId/product/:prodId", async (request, response) =>{
     } 
 });
 
+router.post('/', async (req, res) => {
+    try {
+      // Crear un nuevo carrito
+      const newCart = new cartsModel({
+        user: req.body.userId
+      });
+  
+      // Guardar el carrito en la base de datos
+      const savedCart = await newCart.save();
+  
+      // Enviar la respuesta al cliente con el carrito creado
+      res.status(201).json({
+        message: 'Cart created successfully',
+        cart: savedCart
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+});
+
 
 export default router;

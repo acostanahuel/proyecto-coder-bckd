@@ -12,6 +12,7 @@ import ViewsRouter from "./routes/views.router.js";
 import UsersViewRouter from "./routes/users.views.router.js";
 import sessionsRouter from "./routes/sessions.router.js";
 import githubLoginViewRouter from "./routes/github-login.views.router.js";
+import userRouter from "./routes/user.router.js";
 
 ///mongo
 import mongoose from 'mongoose';
@@ -70,7 +71,7 @@ app.use(`/api/views`, ViewsRouter);
 app.use (`/users`, UsersViewRouter); ///solo rendereiza info por eso va sin api
 app.use (`/api/sessions`, sessionsRouter);
 app.use ('/github', githubLoginViewRouter);
-
+app.use('/api/user', userRouter); //maneja las cosas respectivas al user
 
 const connectMongoDB = async ()=>{
   try {
