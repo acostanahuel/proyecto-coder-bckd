@@ -17,11 +17,14 @@ import { mongoDB_URL } from './setting.js';
 // const environment = program.opts().mode;
 
 
-dotenv.config();
-// dotenv.config({
-//     path:environment==="production"?"./src/config/.env.production":"./src/config/.env.development"
-// });
+// dotenv.config();
+dotenv.config({ debug: true })
 
+
+console.log(process.env.PORT);
+console.log(process.env.MONGO_URL);
+console.log(process.env.ADMIN_NAME);
+console.log(process.env.ADMIN_PASSWORD);
 
 export default {
     port: process.env.PORT,

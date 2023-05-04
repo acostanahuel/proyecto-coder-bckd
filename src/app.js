@@ -6,6 +6,7 @@ import handlebars from "express-handlebars";
 //import MongoSingleton from './config/mongodb-singleton.js'
 import config from "./config/config.js";
 
+
 ///Routers
 import ProductsRouter from "./routes/products.router.js";
 import CartsRouter from "./routes/carts.router.js";
@@ -92,7 +93,7 @@ const httpServer = app.listen(SERVER_PORT, () => {
   console.log(`Server running in port ${SERVER_PORT}`);
   //DoEnv
   console.log(config);
-  console.log(process.env.PORT)
+ 
 });
 
 const socketServer = new Server(httpServer);
