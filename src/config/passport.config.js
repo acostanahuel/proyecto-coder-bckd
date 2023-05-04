@@ -4,7 +4,7 @@ import gitHubStrategy from 'passport-github2'
 import userModel from '../models/user.model.js';
 import { createHash, isValidPassword } from "../util.js";
 import router from '../routes/sessions.router.js';
-
+import bcrypt from 'bcrypt';
 
 //reglas, comenzamos a crear una estrategia
 const localStrategy = passportLocal.Strategy
@@ -66,6 +66,7 @@ passport.use ('github', new gitHubStrategy(
 
                 if (exists){
                    console.log("El usuario ya existe");
+                   console.log ("ENTRA ACA");
                    return done (null, false);
                 }
             
