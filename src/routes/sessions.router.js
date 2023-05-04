@@ -19,14 +19,14 @@ router.get("/githubcallback", passport.authenticate('github', {failureRedirect: 
 });
 
 //ESTA EN user.router.js?
-// router.post("/register", passport.authenticate(
-//     'register', {failureRedirect: '/fail-register'}),  
-//     async (req, res)=>{
-//     console.log("Registrando usuario nuevo");
-//     res.status(201).send ({status: "success", message: "usuario creado con exito"});
-// });
+router.post("/register", passport.authenticate(
+    'register', {failureRedirect: '/fail-register'}),  
+    async (req, res)=>{
+    console.log("Registrando usuario nuevo");
+    res.status(201).send ({status: "success", message: "usuario creado con exito"});
+});
 
-/*codigo de login funciona ahora estoy probando que sea con un admin*/
+/*codigo de login funciona, ahora estoy probando que sea con un admin*/
 /*router.post("/login", passport.authenticate ('login', {failureRedirect: '/api/sessions/fail-login'}), async (req, res)=>{
    console.log('User found to login:');
    const user = req.user;
@@ -65,11 +65,8 @@ router.post("/login", async (req, res) => {
         res.send({ status: 'success', message: 'User logged in successfully.' });
       });
     }
-  }); 
+}); 
   
-
-
-
 
 router.get ('/current', (req, res) => {
     res.send({status:"success" });

@@ -62,12 +62,11 @@ passport.use ('github', new gitHubStrategy(
         {passReqToCallback: true, usernameField: 'email'}, async (req,username,password, done) =>{
             const {first_name, last_name, email, age} = req.body;
             try {
-                const exists = await userModel.findOne({email});
+                const exists = await userModel.findOne({username});
 
                 if (exists){
-                   console.log("El usuario ya existe");
-                   console.log ("ENTRA ACA");
-                   return done (null, false);
+                   console.log("Uusario creado con exito");
+                   return done (null, true);
                 }
             
                const user = {
@@ -126,8 +125,8 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
-};
+ };
 
 
 
-export default initializePassport;
+export default initializePassport
