@@ -3,6 +3,7 @@ import __dirname from "./util.js";
 import { Server } from "socket.io";
 import session from "express-session";
 import handlebars from "express-handlebars";
+//import MongoSingleton from './config/mongodb-singleton.js'
 
 ///Routers
 import ProductsRouter from "./routes/products.router.js";
@@ -72,6 +73,7 @@ app.use (`/users`, UsersViewRouter); ///solo rendereiza info por eso va sin api
 app.use (`/api/sessions`, sessionsRouter);
 app.use ('/github', githubLoginViewRouter);
 app.use('/api/user', userRouter); //maneja las cosas respectivas al user
+
 
 const connectMongoDB = async ()=>{
   try {

@@ -3,8 +3,8 @@ import CartManager from "../Dao/filesystem/cartManager.js";
 import ProductManager from "../Dao/filesystem/ProductManager.js";
 import { cartsModel } from "../models/carts.model.js";
 import { productModel } from "../models/product.model.js";
-import ProductService from "../Dao/services/products.service.js";
-import CartService from "../Dao/services/cart.service.js";
+import ProductService from "../services/products.service.js";
+import CartService from "../services/cart.service.js";
 
 
 const router = Router();

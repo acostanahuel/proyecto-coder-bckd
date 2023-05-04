@@ -9,7 +9,7 @@ registerForm.addEventListener('submit',e=>{
     data.forEach((value,key)=>obj[key]=value);
     //console.log("Objeto formado:");
     //console.log(obj);
-    fetch('/api/sessions/register',{
+    fetch('/api/user/register',{
         method:'POST',
         body:JSON.stringify(obj),
         headers:{
@@ -25,4 +25,4 @@ registerForm.addEventListener('submit',e=>{
       }
     }).then (
         json => console.log(json));
-})
+});

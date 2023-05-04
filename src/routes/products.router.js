@@ -3,7 +3,7 @@ import {Router} from "express"
 //ACTIVAR O DESACTIVAR 
 import ProductManager from "../Dao/filesystem/ProductManager.js";
 import { productModel } from "../models/product.model.js";
-import ProductService from "../Dao/services/products.service.js";
+import ProductService from "../services/products.service.js";
 import mongoosePaginate from 'mongoose-paginate-v2';
 
 
