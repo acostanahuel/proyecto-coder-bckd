@@ -88,10 +88,10 @@ const connectMongoDB = async ()=>{
 };
 connectMongoDB();
 
-const SERVER_PORT = 8080;
+const SERVER_PORT = config.port;
 const httpServer = app.listen(SERVER_PORT, () => {
   console.log(`Server running in port ${SERVER_PORT}`);
-  //DoEnv
+  //DotEnv
   console.log(config);
  
 });
