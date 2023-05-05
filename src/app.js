@@ -3,7 +3,7 @@ import __dirname from "./util.js";
 import { Server } from "socket.io";
 import session from "express-session";
 import handlebars from "express-handlebars";
-//import MongoSingleton from './config/mongodb-singleton.js'
+
 import config from "./config/config.js";
 
 
@@ -21,6 +21,7 @@ import userRouter from "./routes/user.router.js";
 import mongoose from 'mongoose';
 import MongoStore from "connect-mongo";
 import { mongoDB_URL } from "./config/setting.js";
+import MongoSingleton from './config/mongodb-singleton.js'
 
 //cookie
 import cookieParser from "cookie-parser";
@@ -77,16 +78,14 @@ app.use ('/github', githubLoginViewRouter);
 app.use('/api/user', userRouter); //maneja las cosas respectivas al user
 
 
-const connectMongoDB = async ()=>{
+const mongoInstance = async () => {
   try {
-      await mongoose.connect(mongoDB_URL); //DB products en MONGO ATLAS
-      console.log("Conectado con exito a MongoDB usando Moongose.");
+      await MongoSingleton.getInstance();
   } catch (error) {
-      console.error("No se pudo conectar a la BD usando Moongose: " + error);
-      process.exit();
+      console.error(error);
   }
 };
-connectMongoDB();
+mongoInstance();
 
 const SERVER_PORT = config.port;
 const httpServer = app.listen(SERVER_PORT, () => {
