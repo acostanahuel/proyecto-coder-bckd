@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import ProductManager from '../Dao/filesystem/ProductManager.js';
-import CartManager from "../Dao/filesystem/cartManager.js";
-import { cartsModel } from "../models/carts.model.js"
-import { productModel } from "../models/product.model.js";
+import ProductManager from "../services/filesystem/ProductManager.js";
+import CartManager from "../services/filesystem/cartManager.js";
+import { cartsModel } from "../services/models/carts.model.js";
+import { productModel } from "../services/models/product.model.js";
 import cookieParser from 'cookie-parser';
 import mongoosePaginate from 'mongoose-paginate-v2';
 import handlebarsPaginate from 'handlebars-paginate';

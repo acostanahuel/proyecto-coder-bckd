@@ -1,7 +1,7 @@
 import { Router } from "express";
 import passport from 'passport';
-import userModel from "../models/user.model.js";
-import { cartsModel } from "../models/carts.model.js";
+import userModel from "../services/models/user.model.js";
+import { cartsModel } from "../services/models/carts.model.js";
 
 
 const router = Router();

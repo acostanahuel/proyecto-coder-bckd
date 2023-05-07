@@ -1,9 +1,9 @@
 import {Router} from "express"
 
 //ACTIVAR O DESACTIVAR 
-import ProductManager from "../Dao/filesystem/ProductManager.js";
-import { productModel } from "../models/product.model.js";
-import ProductService from "../services/products.service.js";
+import ProductManager from "../services/filesystem/ProductManager.js";
+import { productModel } from "../services/models/product.model.js";
+import ProductService from "../services/dao/products.service.js";
 import mongoosePaginate from 'mongoose-paginate-v2';
 
 

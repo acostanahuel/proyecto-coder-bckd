@@ -10,7 +10,7 @@ import config from "./config/config.js";
 ///Routers
 import ProductsRouter from "./routes/products.router.js";
 import CartsRouter from "./routes/carts.router.js";
-import ProductManager from "./Dao/filesystem/ProductManager.js";
+import ProductManager from "./services/filesystem/ProductManager.js";
 import ViewsRouter from "./routes/views.router.js";
 import UsersViewRouter from "./routes/users.views.router.js";
 import sessionsRouter from "./routes/sessions.router.js";

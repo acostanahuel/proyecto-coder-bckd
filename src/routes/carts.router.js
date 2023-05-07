@@ -1,10 +1,10 @@
 import { Router } from "express";
-import CartManager from "../Dao/filesystem/cartManager.js";
-import ProductManager from "../Dao/filesystem/ProductManager.js";
-import { cartsModel } from "../models/carts.model.js";
-import { productModel } from "../models/product.model.js";
-import ProductService from "../services/products.service.js";
-import CartService from "../services/cart.service.js";
+import CartManager from "../services/filesystem/cartManager.js";
+import ProductManager from "../services/filesystem/ProductManager.js";
+import { cartsModel } from "../services/models/carts.model.js";
+import { productModel } from "../services/models/product.model.js";
+import ProductService from "../services/dao/products.service.js";
+import CartService from "../services/dao/cart.service.js";
 
 
 const router = Router();

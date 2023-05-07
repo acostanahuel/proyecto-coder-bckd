@@ -5,16 +5,15 @@ import program from './process.js';
 
 
 
+
 const environment =  program.opts().mode;
 
 
-// dotenv.config();
-// dotenv.config({ debug: true })
+dotenv.config();
+dotenv.config({ debug: true })
 
 
-dotenv.config({
-    path:environment==="production"?"./.env.production":"./.env.development"  //estan en al raiz como .env
-});
+
 
 
 export default {

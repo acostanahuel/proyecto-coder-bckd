@@ -1,7 +1,7 @@
 import passport from "passport";
 import passportLocal from 'passport-local';
 import gitHubStrategy from 'passport-github2'
-import userModel from '../models/user.model.js';
+import userModel from '../services/models/user.model.js';
 import { createHash, isValidPassword } from "../util.js";
 import router from '../routes/sessions.router.js';
 import bcrypt from 'bcrypt';
@@ -57,7 +57,7 @@ passport.use ('github', new gitHubStrategy(
 
 
 
-//register
+//register 
     passport.use('register', new localStrategy(
         {passReqToCallback: true, usernameField: 'email'}, async (req,username,password, done) =>{
             const {first_name, last_name, email, age} = req.body;
