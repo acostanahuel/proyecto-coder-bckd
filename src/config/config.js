@@ -1,25 +1,15 @@
 import dotenv from 'dotenv';
-import {Command} from 'commander';
-import { mongoDB_URL } from './setting.js';
-import program from './process.js';
 
-
-
-
-const environment =  program.opts().mode;
-
-
-dotenv.config();
-dotenv.config({ debug: true })
-
-
-
-
+dotenv.config({path: "./src/config/.env"});
 
 export default {
     port: process.env.PORT,
     mongoUrl: process.env.MONGO_URL,
     adminName: process.env.ADMIN_NAME,
-    adminPassword: process.env.ADMIN_PASSWORD
+    adminPassword: process.env.ADMIN_PASSWORD,
+    GHclientID: process.env.GHCLIENTID,
+    GHClientSecret: process.env.GHCLIENTSECRET,
+    jwtPrivateKey: process.env.JWT_PRIVATE_KEY,
+    gmailAccount: process.env.GMAIL_ACCOUNT,
+    gmailAppPassword: process.env.GMAIL_APP_PASSWD
 };
-

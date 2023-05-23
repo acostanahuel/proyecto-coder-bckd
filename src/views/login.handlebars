@@ -1,15 +1,22 @@
-<div>
-    <h1>Login</h1>
+<div class="container mt-5 w-50">
+    <h2>Inicia sesion!</h2>
+    <br>
     <form id="loginForm">
-        <label>Email</label>
-        <input name="email">
-        <br/>
-        <label>Contraseña</label>
-        <input name="password">
-
-        <input type="submit">
+        <div class="mb-3 w-50">
+            <label for="nombre" class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" placeholder="Ingresa tu Email">
+        </div>
+        <div class="mb-3 w-50">
+            <label for="password" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" name="password" placeholder="Ingresa tu contraseña">
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
-    <p>¿No estás registrado? <a href="/users/register">Regístrate aquí</a></p>
-    <p>¿Tienes cuenta de Github? <a href="/github/login">Haz login por Github</a></p>
+    <br>
+    <p>Aun no estas registrado? <a href="/users/register">Registrarse!</a></p>
+    <br>
+    <p>Olvidaste la contraseña? <a href="/users/restore">Restaurar contraseña!</a></p>
+    <br>
+    <p>Tienes una cuenta de GitHub?<a href="/github/login">Inicia usando GitHub!</a></p>
 </div>
 <script src="/js/login.js"></script>

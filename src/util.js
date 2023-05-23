@@ -1,58 +1,80 @@
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 import { dirname } from 'path';
 import bcrypt from 'bcrypt';
-import { log } from 'console';
 import jwt from 'jsonwebtoken';
-
+import passport from 'passport';
+import config from "./config/config.js";
+import { fakerES as faker } from '@faker-js/faker';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-
-
-//crypto functions
 export const createHash = password => bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 
 export const isValidPassword = (user, password) => {
-    console.log(`Datos a validar: user-password: ${user.password}, password ${user.password}`);
-    return bcrypt.compareSync (password, user.password);
+
+    return bcrypt.compareSync(password, user.password);
 }
 
+//JSON Web Tokens JWT functions:
+export const generateJwtToken = (user) => {
+    return jwt.sign({user}, config.jwtPrivateKey, {expiresIn: '30m'});
+};
+
+// Middleware for public routes
+export const publicRouteMiddleware = (req, res, next) => {
+    if (req.user) {
+        console.log("Already logged in, redirect");
+        return res.redirect('/products');
+    }
+    next();
+};
+
+// Middleware for private routes
+export const privateRouteMiddleware = (req, res, next) => {
+    if (!req.user) {
+        console.log("Redirect to log in");
+        return res.redirect('/users/login');
+    }
+    next();
+};
+
+//Useful for more controlled calls of the Passport strategy.
+export const passportCall = (strategy) => {
+    return async (req, res, next) => {
+
+        console.log("Calling strategy:");
+        console.log(strategy);
+
+        passport.authenticate(strategy, function (err, user, info) {
+            
+            if (err) return next(err);
+            if (!user) {
+                return res.status(401).send({error: info.messages?info.messages:info.toString()});
+            }
+            console.log("User obtained from the strategy: ");
+            console.log(user);
+            req.user = user;
+            next();
+
+        })(req, res, next);
+    }
+};
 
 
-
-//JSON web tokens JWT functions
-// const PRIVATE_KEY = "NahuelBackendCoderSecretKeyJWT";
-
-// export const generateJWToken = (user) => {
-//     return jwt.sign({user}, PRIVATE_KEY, {expiresIn: '24h' });
-// };
-
-// /**
-//  * Metodo que autentica el token JWT para nuestros requests.
-//  * OJO: Esto actua como un middleware, observar el next.
-//  * @param {*} req Objeto de request
-//  * @param {*} res Objeto de response
-//  * @param {*} next Pasar al siguiente evento.
-//  */
-
-// export const authToken= (req, res, next) => {
-//     //El JWT token se guarda en los headers de autorización
-//     const authHeader = req.headers.authorization;
-//     console.log("Token present in header auth");
-//     console.log(authHeader);
-//     if (!authHeader) {
-//         return res.status(401).send({error: "User not authenticated or missing token."});
-//     }
-//     const token = authHeader.split (' ')[1]; //Se hace el split para retirar la palabra Bearer
-//     //validar token
-//     jwt.verify (token, PRIVATE_KEY, (error, credentials) => {
-//         if (error) return res.status(403).send({error:"Token invalid, unauthorized!"});
-//         //Token OK
-//         req.user = credentials.user;
-//         next();
-//     });
-// }
-
+export const generateMockProduct = () => {
+    let product = {
+        _id: faker.database.mongodbObjectId(),
+        code: faker.string.alphanumeric(7),
+        title: faker.commerce.productName(),
+        description: faker.lorem.text(),
+        price: parseInt(faker.string.numeric(0)),
+        stock: parseInt(faker.string.numeric(1)),
+        category: faker.commerce.department(),
+        thumbnail: faker.image.url()
+    }
+    product.available = product.stock > 0 ? true : false;
+    return product;
+};
 
 export default __dirname;

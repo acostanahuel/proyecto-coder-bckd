@@ -1,132 +1,186 @@
-import passport from "passport";
-import passportLocal from 'passport-local';
-import gitHubStrategy from 'passport-github2'
-import userModel from '../services/models/user.model.js';
-import { createHash, isValidPassword } from "../util.js";
-import router from '../routes/sessions.router.js';
-import bcrypt from 'bcrypt';
+import passport from 'passport'
+import jwtStrategy from 'passport-jwt'
+import passportLocal from 'passport-local'
+import GitHubStrategy from 'passport-github2';
+import { createHash, isValidPassword } from '../util.js'
+import config from './config.js';
+import UserManager from '../dao/db/user.dao.js';
+import CartsService from '../services/carts.service.js';
+import UserDTO from '../dao/db/DTO/user.dto.js';
 
-//reglas, comenzamos a crear una estrategia
-const localStrategy = passportLocal.Strategy
+const userManager = new UserManager();
+const cartsService = new CartsService();
+
+const LocalStrategy = passportLocal.Strategy;
+
+const JwtStrategy = jwtStrategy.Strategy;
+const ExtractJWT = jwtStrategy.ExtractJwt;
 
 const initializePassport = () => {
 
+    passport.use('register', new LocalStrategy(
+        { passReqToCallback: true, usernameField: 'email' }, async (req, username, password, done) => {
 
-    //user sera mail, iniciamos la estregia local y gitHub
-    //done sera nuestra callback
+            const { first_name, last_name, age } = req.body;
+            console.log("Registering user: " + JSON.stringify(req.body));
 
-//gitHub
-passport.use ('github', new gitHubStrategy(
-    {
-        clientID: 'Iv1.3da33b8054af9ae9',
-        clientSecret: '6cc5c19ed67ce5794a03cddc18259811431aba87',
-        callbackURl: 'http://localhost:8080/api/sessions/githubcallback'
-    },
-    async (accessToken, refreshToken, profile, done) => {
-            console.log("Profile obteained from user");
-            console.log(profile);
             try {
-                const user = await userModel.findOne({email: profile._json.email});
-                console.log(("User found to login"));
-                console.log(user);
-                if (!user) {
-                    console.warn("User doesn't exists with username" + profile._json.email);
-                    let newUser = {
-                        first_name: profile._json.name,
-                        last_name:'',
-                        age: 25 ,
-                        email: profile._json.email,
-                        password: '',
-                        loggedBy: 'GitHub'
-                    };
-                    
-                    const result = await userModel.create(newUser);
-                    return done(null, result);
-                }else{ 
-                    //Si entramos por acá significa que el usuario ya existía
-                    return done (null, user);
+
+                const userExists = await userManager.findOne(username);
+
+                if (userExists) {
+                    console.log("User already exist.");
+                    return done(null, false, { messages: 'User already exist.' });
                 }
+
+                const user = new UserDTO({
+                    first_name: first_name,
+                    last_name: last_name,
+                    email: username,
+                    age: age,
+                    password: createHash(password)
+                });
+
+                if (user.email === config.adminName && password === config.adminPassword) {
+                    user.role = 'admin';
+                }
+
+                const result = await userManager.createUser(user);
+
+                return done(null, result, { messages: `User created successfully, ID: ${result.id}` });
+
             } catch (error) {
-                return done (error);
+                return done("Error getting user: " + error)
             }
-
-
-
-    })
-);
-
-
-
-//register 
-    passport.use('register', new localStrategy(
-        {passReqToCallback: true, usernameField: 'email'}, async (req,username,password, done) =>{
-            const {first_name, last_name, email, age} = req.body;
-            try {
-                const exists = await userModel.findOne({username});
-
-                if (exists){
-                   console.log("Uusario creado con exito");
-                   return done (null, true);
-                }
-            
-               const user = {
-                    first_name,
-                    last_name,
-                    email,
-                    age,
-                    password: createHash(password),
-                    loggedBy: "App"
-                };
-                const result = await userModel.create(user);
-                //Todo sale ok
-                return done (null, result);
-            }catch  (error) {
-                return done ("Error registrando usuario:" + error);
         }
-    }
+    ))
+
+    passport.use('login', new LocalStrategy(
+        { passReqToCallback: true, usernameField: 'email' }, async (req, username, password, done) => {
+
+            try {
+
+                const user = await userManager.findOne(username);
+
+                if (!user) {
+                    console.warn("User doesn't exists with username: " + username);
+                    return done(null, false, { messages: "Invalid credentials." });
+                }
+
+                if (!isValidPassword(user, password)) {
+                    console.warn("Invalid credentials for user: " + username);
+                    return done(null, false, { messages: "Invalid credentials." });
+                }
+
+                if (!user.cart) {
+                    console.log("Creating Cart for " + username);
+                    const cart = await cartsService.createCart();
+
+                    user.cart = cart._id;
+                    await user.save();
+                }
+
+
+                return done(null, user, { messages: "Login Success." });
+
+            } catch (error) {
+                return done(error);
+            }
+        })
+    );
+
+    //Strategy to get JWT Token by Cookie:
+    passport.use('jwt', new JwtStrategy(
+        {
+            jwtFromRequest: ExtractJWT.fromExtractors([cookieExtractor]),
+            secretOrKey: config.jwtPrivateKey
+
+        }, async (jwt_payload, done) => {
+
+            try {
+
+                return done(null, jwt_payload.user);
+
+            } catch (error) {
+                console.error(error);
+                return done(error);
+            }
+        }
     ));
 
 
- ///login
- passport.use ('login', new localStrategy(
-    {passReqToCallback: true, usernameField: 'email'}, async (req, username, password, done) => {
+    passport.use('github', new GitHubStrategy(
+        {
+            clientID: config.GHclientID,
+            clientSecret: config.GHClientSecret,
+            callbackURL: 'http://localhost:8080/api/sessions/githubcallback',
+            scope: ['user:email']
+        },
+        async (accessToken, refreshToken, profile, done) => {
+            console.log("Profile obtained from user: ");
+            console.log(profile);
+            try {
+                const user = await userManager.findOne({
+                    email: profile._json.email
+                });
+
+                console.log("User finded for login: " + user);
+
+                if (!user) {
+                    console.warn("User doesn't exists with username: " + profile._json.email);
+
+                    let newUser = {
+                        first_name: profile._json.name,
+                        last_name: '',
+                        age: '',
+                        email: profile._json.email,
+                        password: '',
+                        loggedBy: "GitHub"
+                    };
+
+                    const result = await userManager.createUser(newUser);
+                    return done(null, result);
+
+                } else {
+                    return done(null, user);
+                }
+            } catch (error) {
+                return done(error);
+            }
+        })
+    );
+
+
+    passport.serializeUser((user, done) => {
+        done(null, user._id);
+    });
+
+    passport.deserializeUser(async (id, done) => {
         try {
-            const user= await userModel.findOne({email: username});
-            console.log("Usuario encontrado para login:");
-            console.log(user);
-            if(!user){
-                console.warn ("User doesn't exists with username:" + username);
-                return done (null, false);
-            }
-            if (!isValidPassword (user, password)) {
-                console.warn ("Invalid credentials for user:" + username);
-                return done (null, false);
-            }
-            return done (null, user);
+            let user = await userManager.findById(id);
+            done(null, user);
+
         } catch (error) {
-            return done (error);
+            console.error("Error deserializing the user: " + error);
         }
+    });
+}
+
+/**
+  * Utility method in case you need to extract cookies with Passport
+  * @param {*} req the request object of some router.
+  * @returns The token extracted from a Cookie
+  */
+const cookieExtractor = req => {
+    let token = null;
+
+    if (req && req.cookies) { //Validate that the request and cookies exist.
+        console.log("Token from Cookie:");
+        console.log(req.cookies);
+        token = req.cookies['jwtCookieToken']; //-> Keep in mind this name is that of the Cookie.
     }
- ));  
+    return token;
+};
 
+export default initializePassport;
 
- 
-//funciones de Serializacion y Deserializacion
-passport.serializeUser((user, done) => {
-    done(null, user._id);
-});
-
-passport.deserializeUser(async (id, done) => {
-    try {
-        let user =await userModel.findById(id);
-        done (null, user);
-    } catch (error) {
-        console.error ('Error deserializando el usuario:' + error);
-    }
-});
-
- };
-
-
-
-export default initializePassport

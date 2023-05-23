@@ -1,68 +1,134 @@
-import { Router } from 'express';
-import ProductManager from "../services/filesystem/ProductManager.js";
-import CartManager from "../services/filesystem/cartManager.js";
-import { cartsModel } from "../services/models/carts.model.js";
-import { productModel } from "../services/models/product.model.js";
-import cookieParser from 'cookie-parser';
-import mongoosePaginate from 'mongoose-paginate-v2';
-import handlebarsPaginate from 'handlebars-paginate';
+import { Router } from "express";
+//import of the service for Products. (You can change to file system by swapping the commented line)
+// import ProductManager from "../dao/fs/ProductManager.js";
+import ProductManager from "../dao/db/DTO/fs/ProductManager.js";
+import { io } from '../websocket.js'
+import { productsModel } from "../dao/db/models/products.model.js"
+import { cartsModel } from "../dao/db/models/carts.model.js"
+import { passportCall } from "../util.js";
+import ProductsService from "../services/products.service.js";
+import { isUser } from "../middlewares/role/isUser.middleware.js"
+
+
 
 const router = Router();
+
+// Product manager initalizing
 const productManager = new ProductManager();
+const productsService = new ProductsService();
 
-//cookie
-router.use(cookieParser('n4hu3l'));
+router.get('/', (req, res) => {
+    res.redirect("/users/login");
+});
 
-//session management
-router.get( "/sessions", (req, res) => {
-  if (req.session.counter) {
-    req.session.counter++;
-    res.send (`Se ha visitado este sitio ${req.session.counter} vece`)
-  } else{ 
-    req.session.counter= 1;
-    res.send ("Bienvenido");
-  }
+router.get('/chat', passportCall('jwt'), isUser, (req, res) => {
+    res.render("chat", {});
+})
+
+router.get('/products', passportCall('jwt'), async (req, res) => {
+
+    try {
+
+        const products = await productsService.getProducts(req.query);
+
+        let user, admin = null;
+
+        if (req.user) {
+            user = req.user;
+        }
+        if (req.user.role === "admin") {
+            admin = true;
+        }
+
+        res.render("products", {
+            products,
+            user,
+            admin
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send({ error: "Error ", message: error });
+    }
+});
+
+router.get('/carts/:cid', async (req, res) => {
+/*     const perPage = 10;
+    const page = req.query.page || 1; */
+
+    try {
+        const carts = await cartsModel.paginate({_id: req.params.cid}, { lean: true });
+        res.render("carts", {
+            carts: carts.docs,
+            currentPage: carts.page,
+            totalPages: carts.totalPages
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send({ error: "Error ", message: error });
+    }
 });
 
 
-// Show all products with FSystem
-router.get(`/`, async (req, res) => {
-  const Products = await productManager.getProducts();
-  res.render('home', { Products: Products });
+router.get('/realtimeproducts', async (req, res) => {
+    try {
+        res.render("realTimeProducts");
+    } catch (error) {
+        res.status(500).send({ error: "Error ", message: error });
+    }
 });
 
-router.get(`/realtimeproducts/`,async (req, res) => {
-  res.render('realTimeProducts');
+router.post('/realtimeproducts', async (req, res) => {
+    try {
+        let newProduct = req.body;
+        let productCreated = await productManager.createProduct(newProduct);
+
+        if (productCreated.success) {
+            io.emit("update-products", await productManager.getProducts());
+            res.status(201).send(productCreated.message);
+        } else {
+            res.status(400).send(productCreated.message);
+        }
+
+    } catch (error) {
+        res.status(500).send({ error: "Error saving product.", message: error });
+    }
 });
 
-router.get ("/products", async (req, res) =>{
+router.put('/realtimeproducts/:pid', async (req, res) => {
+    try {
+        const productId = req.params.pid;
+        let productFields = req.body;
+        let productUpdated = await productManager.updateProduct(productId, productFields);
 
-  try {
-      let {category, limit, page, sort} = req.query;
-      let resultProducts = {};
+        if (productUpdated.success) {
+            io.emit("update-products", await productManager.getProducts());
+            res.status(201).send(productUpdated.message);
+        } else {
+            res.status(400).send(productUpdated.message);
+        }
 
-      let prod = await productModel.paginate({}, {limit: (limit ? limit: 10), page: (page ? page: 2), sort: (sort ? sort: {price:1})})
-
-      resultProducts = {
-          status: "succcess",
-          payload: prod.docs,
-          totalPages: prod.totalPages,
-          prevPage: prod.prevPage,
-          nextPage: prod.nextPage,
-          page: prod.page,
-          hasPrevPage: prod.hasPrevPage,
-          hasNextPage: prod.hasNextPage,
-          prevLink: prod.hasPrevPage != false  ? `http://localhost:8080/api/views/products?limit=${(limit ? limit : 10)}&page=${parseInt((page ? page : 1))-1}&sort=${(sort ? sort: {price:1})}` : null ,
-          nextLink: prod.hasNextPage != false  ? `http://localhost:8080/api/views/products?limit=${(limit ? limit : 10)}&page=${parseInt((page ? page : 1))+1}&sort=${(sort ? sort: {price:1})}` : null ,
-  }
-  res.render('products', {resultProducts});
-  // response.send(prod);
-  console.log(resultProducts);
-} catch(error){
-  console.log(error)
-  res.status(500).send({error: "Error al consultar los productos", message: error});
-}
+    } catch (error) {
+        res.status(500).send({ error: "Error saving product.", message: error });
+    }
 });
 
+router.delete('/realtimeproducts/:pid', async (req, res) => {
+    try {
+        const productId = req.params.pid;
+        let productDeleted = await productManager.deleteProduct(productId)
+
+        if (productDeleted.success) {
+            io.emit("update-products", await productManager.getProducts());
+            res.status(201).send(productDeleted.message);
+        } else {
+            res.status(400).send(productDeleted.message);
+        }
+
+    } catch (error) {
+        res.status(500).send({ error: "Error saving product.", message: error });
+    }
+});
 
 export default router;

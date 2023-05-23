@@ -1,112 +1,98 @@
 import express from "express";
-import __dirname from "./util.js";
-import { Server } from "socket.io";
-import session from "express-session";
-import handlebars from "express-handlebars";
-
+import handlebars from 'express-handlebars';
+import session from 'express-session';
+import cookieParser from 'cookie-parser';
+import __dirname from './util.js';
+import path from 'path';
+import {setupWebSocket} from './websocket.js';
 import config from "./config/config.js";
+import dotenv from 'dotenv';
 
-
-///Routers
-import ProductsRouter from "./routes/products.router.js";
-import CartsRouter from "./routes/carts.router.js";
-import ProductManager from "./services/filesystem/ProductManager.js";
-import ViewsRouter from "./routes/views.router.js";
-import UsersViewRouter from "./routes/users.views.router.js";
-import sessionsRouter from "./routes/sessions.router.js";
-import githubLoginViewRouter from "./routes/github-login.views.router.js";
-import userRouter from "./routes/user.router.js";
-
-///mongo
+//Database
 import mongoose from 'mongoose';
-import MongoStore from "connect-mongo";
-import { mongoDB_URL } from "./config/setting.js";
-import MongoSingleton from './config/mongodb-singleton.js'
-
-//cookie
-import cookieParser from "cookie-parser";
-
-//passport
-import passport from "passport";
-import initializePassport from "./config/passport.config.js";
-
-
-const app = express();
-const productManager = new ProductManager();
-
-
-// JSON encode para poder recibir JSON.
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-
-// handlebars use
-app.engine('handlebars', handlebars.engine());
-app.set('views', __dirname + "/views");
-app.set('view engine', 'handlebars');
-
-
-//public folder
-app.use(express.static(__dirname + '/public'));
-//cookie
-app.use(cookieParser('n4hu3l'));
-
-app.use(session({
-  store: MongoStore.create({
-      mongoUrl: mongoDB_URL,
-      mongoOptions: {useNewUrlParser: true, useUnifiedTopology: true},
-      ttl: 30
-  }),
-  secret: "n4hu3l",
-  resave: false,
-  saveUninitialized: true
-}));
-
-//middlewares passport
-initializePassport();
-app.use(passport.initialize());
-app.use (passport.session());
-
+import MongoStore from 'connect-mongo';
+import MongoSingleton from "./config/mongodb-singleton.js";
+// Errors
+import errorHandler from './middlewares/errors/errors.middleware.js'
+// Passport
+import passport from 'passport';
+import initializePassport from './config/passport.config.js';
 
 // Routers
-app.use(`/api/products`, ProductsRouter);
-app.use(`/api/carts`, CartsRouter);
-app.use(`/api/views`, ViewsRouter);
-app.use (`/users`, UsersViewRouter); ///solo rendereiza info por eso va sin api
-app.use (`/api/sessions`, sessionsRouter);
-app.use ('/github', githubLoginViewRouter);
-app.use('/api/user', userRouter); //maneja las cosas respectivas al user
+import productsRouter from "./routes/products.router.js";
+import cartRouter from "./routes/cart.router.js";
+import viewsRouter from './routes/views.router.js';
+import usersViewsRouter from './routes/user.views.router.js';
+import sessionsRouter from './routes/auth.router.js';
+import githubLoginRouter from './routes/github-login.views.router.js';
+import ticketsRouter from './routes/tickets.router.js'
+import emailRouter from './routes/email.router.js';
+import mockingRouter from './routes/mock.router.js';
+
+//Declare Express server.
+const app = express();
+
+//Prepare server settings to receive JSON objects
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+
+// Define path for static content
+app.use(express.static(path.join(__dirname +'/public')));
+
+// Define the template engine and views
+app.engine('handlebars', handlebars.engine());
+app.set('view engine', 'handlebars');
+app.set('views', __dirname + "/views");
+
+//Session
+app.use(session(
+    {
+        store: MongoStore.create({
+            mongoUrl: config.mongoUrl,
+            mongoOptions: {useNewUrlParser: true, useUnifiedTopology: true},
+            ttl: 30,
+        }),
+        secret: "n4hu3l",
+        resave: false,
+        saveUninitialized: true
+    }
+));
 
 
+// COOKIES
+app.use(cookieParser("Cookie$C0derKe7"));
+
+//MIDDLEWARE PASSPORT
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+// Routes
+app.use("/api/products", productsRouter);
+app.use("/api/carts", cartRouter);
+app.use("/api/sessions", sessionsRouter);
+app.use('/api/tickets', ticketsRouter);
+app.use("/users", usersViewsRouter);
+app.use("/github", githubLoginRouter);
+app.use("/api/mail", emailRouter);
+app.use("/", viewsRouter);
+app.use('/mockingproducts', mockingRouter)
+
+const httpServer = app.listen(config.port, () => {
+    console.log(`Servidor corriendo en el puerto: ${config.port}`);
+})
+// Initialize websocket Server
+setupWebSocket(httpServer);
+
+// MongoDb
 const mongoInstance = async () => {
-  try {
-      await MongoSingleton.getInstance();
-  } catch (error) {
-      console.error(error);
-  }
-};
-mongoInstance();
-
-const SERVER_PORT = config.port;
-const httpServer = app.listen(SERVER_PORT, () => {
-  console.log(`Server running in port ${SERVER_PORT}`);
-  //DotEnv
-  console.log(config);
- 
-});
-
-const socketServer = new Server(httpServer);
-
-socketServer.on('connection', socket => {
-  console.log('new user conected:', socket.id);
-
-  socket.on('client:message', msg => { console.log(msg); });- 
-
-  socket.on('client:products', async ()=> {
-    const Products =  await productManager.getProducts();
-    socket.emit('server:products', Products);
-  });
-});
-
-
-
+    try {
+        await MongoSingleton.getInstance();
+    } catch (error) {
+        console.error(error);
+    }
+  };
+  mongoInstance()
+//MIDDLEWARE ERROR
+app.use(errorHandler);
